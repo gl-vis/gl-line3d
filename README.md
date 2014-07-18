@@ -4,6 +4,8 @@ A 3D line plot for WebGL
 
 # Example
 
+[Try it out in your browser](http://mikolalysenko.github.io/gl-line-plot)
+
 ```javascript
 var shell = require("gl-now")({ clearColor: [0,0,0,0] })
 var camera = require("game-shell-orbit-camera")(shell)
