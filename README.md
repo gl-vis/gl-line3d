@@ -119,7 +119,12 @@ Draws the line plot with the given camera parameters
 * `camera` is an object with the model, view and projection matrices of the plot as properties.
 
 #### `plot.update(options)`
-Updates the plot
+Updates the plot.  This takes the following parameters:
+
+* `options.position` An array of position values for the points on the curve
+* `options.color` An array of color values (or a singular color) for the curve
+* `options.pickId` The selection ID for the line plot
+* `options.lineWidth` The width of the line
 
 #### `plot.dispose()`
 
