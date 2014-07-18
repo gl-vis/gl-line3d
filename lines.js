@@ -32,6 +32,15 @@ function distance(a, b) {
   return Math.sqrt(s)
 }
 
+function filterClipBounds(bounds) {
+  var result = [[-1e6,-1e6,-1e6], [1e6,1e6,1e6]]
+  for(var i=0; i<3; ++i) {
+    result[0][i] = Math.max(bounds[0][i], result[0][i])
+    result[1][i] = Math.min(bounds[1][i], result[1][i])
+  }
+  return result
+}
+
 function PickResult(tau, position) {
   this.arcLength = tau
   this.position = position
@@ -43,6 +52,8 @@ function LinePlot(gl, shader, pickShader, buffer, vao) {
   this.pickShader = pickShader
   this.buffer = buffer
   this.vao = vao
+  this.clipBounds = [[-Infinity,-Infinity,-Infinity], 
+                     [ Infinity, Infinity, Infinity]]
   this.points = []
   this.arcLength = []
   this.vertexCount = 0
@@ -62,7 +73,7 @@ proto.draw = function(camera) {
     model: camera.model || identity,
     view: camera.view || identity,
     projection: camera.projection || identity,
-    color: this.color
+    clipBounds: filterClipBounds(this.clipBounds)
   }
   vao.bind()
   vao.draw(gl.LINES, this.vertexCount)
@@ -77,12 +88,12 @@ proto.drawPick = function(camera) {
     model: camera.model || identity,
     view: camera.view || identity,
     projection: camera.projection || identity,
-    pickId: this.pickId
+    pickId: this.pickId,
+    clipBounds: filterClipBounds(this.clipBounds)
   }
   vao.bind()
   vao.draw(gl.LINES, this.vertexCount)
 }
-
 
 proto.update = function(options) {
   if("pickId" in options) {
