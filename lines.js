@@ -109,7 +109,7 @@ proto.update = function(options) {
   }
   
   //Default color
-  var colors = options.color || [0,0,0]
+  var colors = options.color || options.colors || [0,0,0]
 
   //Recalculate buffer data
   var buffer = []
