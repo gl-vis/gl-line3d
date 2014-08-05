@@ -11,7 +11,7 @@ varying float pixelArcLength;
 void main() {
   vec4 worldCoordinate = model * vec4(position, 1);
   gl_Position = projection * view * worldCoordinate;
-  worldPosition = worldCoordinate.xyz / worldCoordinate.w;
+  worldPosition = position;
   pixelArcLength = arcLength;
   fragColor = color;
 }
