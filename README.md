@@ -127,6 +127,8 @@ Updates the plot.  This takes the following parameters:
 * `options.color` An array of color values (or a singular color) for the curve
 * `options.pickId` The selection ID for the line plot
 * `options.lineWidth` The width of the line
+* `options.dashes` An array of dash patterns representing the dash pattern.  For example, `[0.5,0.5,0.5]`
+* `options.dashScale` The number of times to repeat the dash pattern
 
 #### `plot.dispose()`
 

@@ -1,21 +1,23 @@
-"use strict"
+'use strict'
 
 module.exports = createLinePlot
 
-var createBuffer = require("gl-buffer")
-var createVAO = require("gl-vao")
-var glslify = require("glslify")
-var unpackFloat = require("glsl-read-float")
-var bsearch = require("binary-search-bounds")
+var createBuffer  = require('gl-buffer')
+var createVAO     = require('gl-vao')
+var createTexture = require('gl-texture2d')
+var glslify       = require('glslify')
+var unpackFloat   = require('glsl-read-float')
+var bsearch       = require('binary-search-bounds')
+var ndarray       = require('ndarray')
 
 var createShader = glslify({
-  vert: "./shaders/vertex.glsl",
-  frag: "./shaders/fragment.glsl"
+  vert: './shaders/vertex.glsl',
+  frag: './shaders/fragment.glsl'
 })
 
 var createPickShader = glslify({
-  vert: "./shaders/vertex.glsl",
-  frag: "./shaders/pick.glsl"
+  vert: './shaders/vertex.glsl',
+  frag: './shaders/pick.glsl'
 })
 
 var identity = [1,0,0,0,
@@ -46,49 +48,53 @@ function PickResult(tau, position) {
   this.position = position
 }
 
-function LinePlot(gl, shader, pickShader, buffer, vao) {
-  this.gl = gl
-  this.shader = shader
-  this.pickShader = pickShader
-  this.buffer = buffer
-  this.vao = vao
-  this.clipBounds = [[-Infinity,-Infinity,-Infinity], 
-                     [ Infinity, Infinity, Infinity]]
-  this.points = []
-  this.arcLength = []
-  this.vertexCount = 0
-  this.bounds = [[0,0,0],[0,0,0]]
-  this.pickId = 0
-  this.lineWidth = 1
+function LinePlot(gl, shader, pickShader, buffer, vao, texture) {
+  this.gl           = gl
+  this.shader       = shader
+  this.pickShader   = pickShader
+  this.buffer       = buffer
+  this.vao          = vao
+  this.clipBounds   = [[-Infinity,-Infinity,-Infinity], 
+                       [ Infinity, Infinity, Infinity]]
+  this.points       = []
+  this.arcLength    = []
+  this.vertexCount  = 0
+  this.bounds       = [[0,0,0],[0,0,0]]
+  this.pickId       = 0
+  this.lineWidth    = 1
+  this.texture      = texture
+  this.dashScale    = 1
 }
 
 var proto = LinePlot.prototype
 
 proto.draw = function(camera) {
-  var gl = this.gl
-  var shader = this.shader
-  var vao = this.vao
+  var gl      = this.gl
+  var shader  = this.shader
+  var vao     = this.vao
   shader.bind()
   shader.uniforms = {
-    model: camera.model || identity,
-    view: camera.view || identity,
-    projection: camera.projection || identity,
-    clipBounds: filterClipBounds(this.clipBounds)
+    model:        camera.model      || identity,
+    view:         camera.view       || identity,
+    projection:   camera.projection || identity,
+    clipBounds:   filterClipBounds(this.clipBounds),
+    dashTexture:  this.texture.bind(),
+    dashScale:    this.dashScale / this.arcLength[this.arcLength.length-1]
   }
   vao.bind()
   vao.draw(gl.LINES, this.vertexCount)
 }
 
 proto.drawPick = function(camera) {
-  var gl = this.gl
-  var shader = this.pickShader
-  var vao = this.vao
+  var gl      = this.gl
+  var shader  = this.pickShader
+  var vao     = this.vao
   shader.bind()
   shader.uniforms = {
-    model: camera.model || identity,
-    view: camera.view || identity,
+    model:      camera.model      || identity,
+    view:       camera.view       || identity,
     projection: camera.projection || identity,
-    pickId: this.pickId,
+    pickId:     this.pickId,
     clipBounds: filterClipBounds(this.clipBounds)
   }
   vao.bind()
@@ -101,6 +107,9 @@ proto.update = function(options) {
   }
   if("lineWidth" in options) {
     this.lineWidth = options.lineWidth
+  }
+  if("dashScale" in options) {
+    this.dashScale = options.dashScale
   }
 
   var positions = options.position || options.positions
@@ -141,7 +150,7 @@ proto.update = function(options) {
 
     var t0 = arcLength
     arcLength += distance(a, b)
-    buffer.push(a[0], a[1], a[2], t0, acolor[0], acolor[1], acolor[2],
+    buffer.push(a[0], a[1], a[2], t0,        acolor[0], acolor[1], acolor[2],
                 b[0], b[1], b[2], arcLength, bcolor[0], bcolor[1], bcolor[2])
 
     vertexCount += 2
@@ -157,6 +166,31 @@ proto.update = function(options) {
 
   this.points = pointArray
   this.arcLength = arcLengthArray
+
+  if('dashes' in options) {
+    var dashArray = options.dashes
+
+    //Calculate prefix sum
+    var prefixSum = dashArray.slice()
+    prefixSum.unshift(0)
+    for(var i=1; i<prefixSum.length; ++i) {
+      prefixSum[i] = prefixSum[i-1] + prefixSum[i]
+    }
+
+    var dashTexture = ndarray(new Array(256*4), [256, 1, 4])
+    for(var i=0; i<256; ++i) {
+      for(var j=0; j<4; ++j) {
+        dashTexture.set(i,0,j, 0)
+      }
+      if(bsearch.le(prefixSum, prefixSum[prefixSum.length-1]*i/255.0) & 1) {
+        dashTexture.set(i,0,0, 0)
+      } else {
+        dashTexture.set(i,0,0, 255)
+      }
+    }
+
+    this.texture.setPixels(dashTexture)
+  }
 }
 
 proto.dispose = function() {
@@ -199,38 +233,46 @@ proto.pick = function(selection) {
 
 function createLinePlot(gl, options) {
   var shader = createShader(gl)
-  shader.attributes.position.location = 0
-  shader.attributes.arcLength.location = 1
-  shader.attributes.color.location = 2
+  shader.attributes.position.location   = 0
+  shader.attributes.arcLength.location  = 1
+  shader.attributes.color.location      = 2
 
   var pickShader = createPickShader(gl)
-  pickShader.attributes.position.location = 0
-  pickShader.attributes.arcLength.location = 1
-  pickShader.attributes.color.location = 2
+  pickShader.attributes.position.location   = 0
+  pickShader.attributes.arcLength.location  = 1
+  pickShader.attributes.color.location      = 2
 
   var buffer = createBuffer(gl)
   var vao = createVAO(gl, [
       {
-        "buffer": buffer,
-        "size": 3,
-        "offset": 0,
-        "stride": 28
+        'buffer': buffer,
+        'size': 3,
+        'offset': 0,
+        'stride': 28
       },
       { 
-        "buffer": buffer,
-        "size": 1,
-        "offset": 12,
-        "stride": 28
+        'buffer': buffer,
+        'size': 1,
+        'offset': 12,
+        'stride': 28
       },
       {
-        "buffer": buffer,
-        "size": 3,
-        "offset": 16,
-        "stride": 28
+        'buffer': buffer,
+        'size': 3,
+        'offset': 16,
+        'stride': 28
       }
     ])
 
-  var linePlot = new LinePlot(gl, shader, pickShader, buffer, vao)
+  //Create texture for dash pattern
+  var defaultTexture = ndarray(new Array(256*4), [256,1,4])
+  for(var i=0; i<256*4; ++i) {
+    defaultTexture.data[i] = 255
+  }
+  var texture = createTexture(gl, defaultTexture)
+  texture.wrap = gl.REPEAT
+
+  var linePlot = new LinePlot(gl, shader, pickShader, buffer, vao, texture)
   linePlot.update(options)
   return linePlot
 }
