@@ -72,6 +72,7 @@ proto.draw = function(camera) {
   var gl      = this.gl
   var shader  = this.shader
   var vao     = this.vao
+  gl.lineWidth(this.lineWidth)
   shader.bind()
   shader.uniforms = {
     model:        camera.model      || identity,
@@ -89,6 +90,7 @@ proto.drawPick = function(camera) {
   var gl      = this.gl
   var shader  = this.pickShader
   var vao     = this.vao
+  gl.lineWidth(this.lineWidth)
   shader.bind()
   shader.uniforms = {
     model:      camera.model      || identity,
