@@ -13,5 +13,5 @@ void main() {
   if(any(lessThan(worldPosition, clipBounds[0])) || any(greaterThan(worldPosition, clipBounds[1]))) {
     discard;
   }
-  gl_FragColor = vec4(pickId, packFloat(pixelArcLength).xyz);
+  gl_FragColor = vec4(pickId/255.0, packFloat(pixelArcLength).xyz);
 }
