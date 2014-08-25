@@ -1,4 +1,4 @@
-precision highp float;
+precision mediump float;
 
 #pragma glslify: packFloat = require(glsl-read-float)
 
@@ -7,7 +7,7 @@ uniform vec3 clipBounds[2];
 
 varying vec3 worldPosition;
 varying float pixelArcLength;
-varying vec3 fragColor;
+varying vec4 fragColor;
 
 void main() {
   if(any(lessThan(worldPosition, clipBounds[0])) || any(greaterThan(worldPosition, clipBounds[1]))) {

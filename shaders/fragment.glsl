@@ -6,7 +6,7 @@ uniform float     dashScale;
 
 varying vec3    worldPosition;
 varying float   pixelArcLength;
-varying vec3    fragColor;
+varying vec4    fragColor;
 
 void main() {
   if(any(lessThan(worldPosition, clipBounds[0])) || any(greaterThan(worldPosition, clipBounds[1]))) {
@@ -16,5 +16,5 @@ void main() {
   if(dashWeight < 0.5) {
     discard;
   }
-  gl_FragColor = vec4(fragColor, 1);
+  gl_FragColor = fragColor;
 }

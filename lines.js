@@ -104,13 +104,13 @@ proto.drawPick = function(camera) {
 }
 
 proto.update = function(options) {
-  if("pickId" in options) {
+  if('pickId' in options) {
     this.pickId = options.pickId
   }
-  if("lineWidth" in options) {
+  if('lineWidth' in options) {
     this.lineWidth = options.lineWidth
   }
-  if("dashScale" in options) {
+  if('dashScale' in options) {
     this.dashScale = options.dashScale
   }
 
@@ -120,7 +120,7 @@ proto.update = function(options) {
   }
   
   //Default color
-  var colors = options.color || options.colors || [0,0,0]
+  var colors = options.color || options.colors || [0,0,0,1]
 
   //Recalculate buffer data
   var buffer = []
@@ -149,11 +149,17 @@ proto.update = function(options) {
     } else {
       acolor = bcolor = colors
     }
+    if(acolor.length === 3) {
+      acolor = [acolor[0], acolor[1], acolor[2], 1]
+    }
+    if(bcolor.length === 3) {
+      bcolor = [bcolor[0], bcolor[1], bcolor[2], 1]
+    }
 
     var t0 = arcLength
     arcLength += distance(a, b)
-    buffer.push(a[0], a[1], a[2], t0,        acolor[0], acolor[1], acolor[2],
-                b[0], b[1], b[2], arcLength, bcolor[0], bcolor[1], bcolor[2])
+    buffer.push(a[0], a[1], a[2], t0,        acolor[0], acolor[1], acolor[2], acolor[3],
+                b[0], b[1], b[2], arcLength, bcolor[0], bcolor[1], bcolor[2], bcolor[3])
 
     vertexCount += 2
   }
@@ -250,19 +256,19 @@ function createLinePlot(gl, options) {
         'buffer': buffer,
         'size': 3,
         'offset': 0,
-        'stride': 28
+        'stride': 32
       },
       { 
         'buffer': buffer,
         'size': 1,
         'offset': 12,
-        'stride': 28
+        'stride': 32
       },
       {
         'buffer': buffer,
-        'size': 3,
+        'size': 4,
         'offset': 16,
-        'stride': 28
+        'stride': 32
       }
     ])
 

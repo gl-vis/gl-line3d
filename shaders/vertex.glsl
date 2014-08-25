@@ -1,10 +1,12 @@
+precision mediump float;
+
 attribute vec3 position;
 attribute float arcLength;
-attribute vec3 color;
+attribute vec4 color;
 
 uniform mat4 model, view, projection;
 
-varying vec3 fragColor;
+varying vec4 fragColor;
 varying vec3 worldPosition;
 varying float pixelArcLength;
 
