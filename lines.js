@@ -43,9 +43,10 @@ function filterClipBounds(bounds) {
   return result
 }
 
-function PickResult(tau, position) {
+function PickResult(tau, position, index) {
   this.arcLength = tau
-  this.position = position
+  this.position  = position
+  this.index     = index
 }
 
 function LinePlot(gl, shader, pickShader, buffer, vao, texture) {
@@ -226,7 +227,8 @@ proto.pick = function(selection) {
   if(index === this.arcLength.length-1) {
     return new PickResult(
       this.arcLength[this.arcLength.length-1], 
-      this.points[this.points.length-1].slice())
+      this.points[this.points.length-1].slice(),
+      index)
   }
   var a = this.points[index]
   var b = this.points[index+1]
@@ -236,7 +238,10 @@ proto.pick = function(selection) {
   for(var i=0; i<3; ++i) {
     x[i] = ti * a[i] + t * b[i]
   }
-  return new PickResult(tau, x)
+  return new PickResult(
+    tau, 
+    x, 
+    (t < 0.5) ? index : (index+1))
 }
 
 function createLinePlot(gl, options) {

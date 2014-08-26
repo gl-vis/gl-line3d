@@ -148,6 +148,7 @@ Returns selection information from the given user selection data.
 
 * `arcLength` the arc length parameter of the selection
 * `position` the position of the vertex at the selected point
+* `index` the index of the closest data point
 
 ## Properties
 
