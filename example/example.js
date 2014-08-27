@@ -33,11 +33,12 @@ shell.on("gl-init", function() {
         (i/50) - 1.0
       ])
   }
+
   lines = createLines(gl, {
     position: polyline,
     color: [1,0,0],
     dashes: [0.5,0.5],
-    dashScale: 0.1
+    dashScale: 100
   })
 
   //Create axes object

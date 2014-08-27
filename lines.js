@@ -124,21 +124,27 @@ proto.update = function(options) {
   var colors = options.color || options.colors || [0,0,0,1]
 
   //Recalculate buffer data
-  var buffer = []
-  var arcLengthArray = []
-  var pointArray = []
-  var arcLength = 0.0
-  var vertexCount = 0
+  var buffer          = []
+  var arcLengthArray  = []
+  var pointArray      = []
+  var arcLength       = 0.0
+  var vertexCount     = 0
   var bounds = [[ Infinity, Infinity, Infinity],
                 [-Infinity,-Infinity,-Infinity]]
+
+fill_loop:
   for(var i=1; i<positions.length; ++i) {
     var a = positions[i-1]
     var b = positions[i]
 
     arcLengthArray.push(arcLength)
     pointArray.push(a.slice())
-
+    
     for(var j=0; j<3; ++j) {
+      if(isNaN(a[j]) || isNaN(b[j]) ||
+        !isFinite(a[j]) || !isFinite(b[j])) {
+        continue fill_loop
+      }
       bounds[0][j] = Math.min(bounds[0][j], a[j], b[j])
       bounds[1][j] = Math.max(bounds[1][j], a[j], b[j])
     }
@@ -168,6 +174,13 @@ proto.update = function(options) {
 
   arcLengthArray.push(arcLength)
   pointArray.push(positions[positions.length-1].slice())
+
+  for(var i=0; i<3; ++i) {
+    if(bounds[0][i] > bounds[1][i]) {
+      bounds[0][i] = -Infinity
+      bounds[1][i] =  Infinity
+    }
+  }
 
   this.bounds = bounds
 
