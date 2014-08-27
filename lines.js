@@ -175,13 +175,6 @@ fill_loop:
   arcLengthArray.push(arcLength)
   pointArray.push(positions[positions.length-1].slice())
 
-  for(var i=0; i<3; ++i) {
-    if(bounds[0][i] > bounds[1][i]) {
-      bounds[0][i] = -Infinity
-      bounds[1][i] =  Infinity
-    }
-  }
-
   this.bounds = bounds
 
   this.vertexCount = vertexCount
