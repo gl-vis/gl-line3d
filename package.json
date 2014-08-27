@@ -1,6 +1,6 @@
 {
   "name": "gl-line-plot",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "3D line plot",
   "main": "lines.js",
   "directories": {
