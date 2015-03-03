@@ -3,6 +3,7 @@ precision mediump float;
 uniform vec3      clipBounds[2];
 uniform sampler2D dashTexture;
 uniform float     dashScale;
+uniform float     opacity;
 
 varying vec3    worldPosition;
 varying float   pixelArcLength;
@@ -16,5 +17,5 @@ void main() {
   if(dashWeight < 0.5) {
     discard;
   }
-  gl_FragColor = fragColor;
+  gl_FragColor = fragColor * opacity;
 }

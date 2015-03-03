@@ -47,14 +47,14 @@ shell.on("gl-init", function() {
   })
 
   //Create selection buffer
-  select = createSelect(gl, [shell.height, shell.width])
+  select = createSelect(gl, [shell.width, shell.height])
 
   //Create spike ball
   spikes = createSpikes(gl, {bounds: [[-1,-1,-1], [1,1,1]]})
 })
 
 function drawPick(cameraParameters) {
-  select.shape = [shell.height, shell.width]
+  select.shape = [shell.width, shell.height]
   select.begin(shell.mouse[0], shell.mouse[1], 30)
   lines.drawPick(cameraParameters)
   var selected = select.end()

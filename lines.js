@@ -5,20 +5,13 @@ module.exports = createLinePlot
 var createBuffer  = require('gl-buffer')
 var createVAO     = require('gl-vao')
 var createTexture = require('gl-texture2d')
-var glslify       = require('glslify')
 var unpackFloat   = require('glsl-read-float')
 var bsearch       = require('binary-search-bounds')
 var ndarray       = require('ndarray')
+var shaders       = require('./lib/shaders')
 
-var createShader = glslify({
-  vert: './shaders/vertex.glsl',
-  frag: './shaders/fragment.glsl'
-})
-
-var createPickShader = glslify({
-  vert: './shaders/vertex.glsl',
-  frag: './shaders/pick.glsl'
-})
+var createShader      = shaders.createShader
+var createPickShader  = shaders.createPickShader
 
 var identity = [1,0,0,0,
                 0,1,0,0,
@@ -65,11 +58,26 @@ function LinePlot(gl, shader, pickShader, buffer, vao, texture) {
   this.lineWidth    = 1
   this.texture      = texture
   this.dashScale    = 1
+  this.opacity      = 1
 }
 
 var proto = LinePlot.prototype
 
-proto.draw = function(camera) {
+proto.isTransparent = function() {
+  return this.opacity < 1
+}
+
+proto.isOpaque = function() {
+  return this.opacity >= 1
+}
+
+proto.pickSlots = 1
+
+proto.setPickBase = function(id) {
+  this.pickId = this.pickId
+}
+
+proto.drawTransparent = proto.draw = function(camera) {
   var gl      = this.gl
   var shader  = this.shader
   var vao     = this.vao
@@ -81,7 +89,8 @@ proto.draw = function(camera) {
     projection:   camera.projection || identity,
     clipBounds:   filterClipBounds(this.clipBounds),
     dashTexture:  this.texture.bind(),
-    dashScale:    this.dashScale / this.arcLength[this.arcLength.length-1]
+    dashScale:    this.dashScale / this.arcLength[this.arcLength.length-1],
+    opacity:      this.opacity
   }
   vao.bind()
   vao.draw(gl.LINES, this.vertexCount)
