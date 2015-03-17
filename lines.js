@@ -123,6 +123,9 @@ proto.update = function(options) {
   if('dashScale' in options) {
     this.dashScale = options.dashScale
   }
+  if('opacity' in options) {
+    this.opacity = +options.opacity
+  }
 
   var positions = options.position || options.positions
   if(!positions) {
@@ -259,7 +262,9 @@ proto.pick = function(selection) {
     (t < 0.5) ? index : (index+1))
 }
 
-function createLinePlot(gl, options) {
+function createLinePlot(options) {
+  var gl = options.gl || (options.scene && options.scene.gl)
+
   var shader = createShader(gl)
   shader.attributes.position.location   = 0
   shader.attributes.arcLength.location  = 1
