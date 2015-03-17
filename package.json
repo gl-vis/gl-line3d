@@ -40,9 +40,9 @@
   "author": "Mikola Lysenko",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/mikolalysenko/gl-line-plot/issues"
+    "url": "https://github.com/gl-vis/gl-line-plot/issues"
   },
-  "homepage": "https://github.com/mikolalysenko/gl-line-plot",
+  "homepage": "https://github.com/gl-vis/gl-line-plot",
   "browserify": {
     "transform": [
       "glslify"
