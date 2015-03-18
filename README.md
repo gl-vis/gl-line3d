@@ -1,14 +1,14 @@
-gl-line-plot
+gl-line3d
 ============
 A 3D WebGL line plot
 
 # Example
 
-[Try it out in your browser](http://gl-vis.github.io/gl-line-plot)
+[Try it out in your browser](http://gl-vis.github.io/gl-line3d)
 
 ```javascript
 var createScene = require('gl-plot3d')
-var createLine = require('gl-line-plot')
+var createLine  = require('gl-line3d')
 
 //Create the scene
 var scene = createScene()
@@ -38,14 +38,14 @@ scene.add(lines)
 # Install
 
 ```
-npm install gl-line-plot
+npm install gl-line3d
 ```
 
 # Basic interface
 
 ## Constructor
 
-#### `var lines = require('gl-line-plot')(options)
+#### `var lines = require('gl-line3d')(options)
 Creates a new line plot
 
 * `options.gl` A WebGL context
