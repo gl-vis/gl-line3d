@@ -59,6 +59,7 @@ function LinePlot(gl, shader, pickShader, buffer, vao, texture) {
   this.texture      = texture
   this.dashScale    = 1
   this.opacity      = 1
+  this.dirty        = true
 }
 
 var proto = LinePlot.prototype
@@ -114,9 +115,8 @@ proto.drawPick = function(camera) {
 }
 
 proto.update = function(options) {
-  if('pickId' in options) {
-    this.pickId = options.pickId
-  }
+  this.dirty = true
+
   if('lineWidth' in options) {
     this.lineWidth = options.lineWidth
   }
