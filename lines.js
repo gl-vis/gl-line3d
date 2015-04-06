@@ -76,7 +76,7 @@ proto.isOpaque = function() {
 proto.pickSlots = 1
 
 proto.setPickBase = function(id) {
-  this.pickId = this.pickId
+  this.pickId = id
 }
 
 proto.drawTransparent = proto.draw = function(camera) {
@@ -250,14 +250,14 @@ proto.pick = function(selection) {
       index)
   }
   var a = this.points[index]
-  var b = this.points[index+1]
+  var b = this.points[Math.min(index+1, this.points.length-1)]
   var t = (tau - this.arcLength[index]) / (this.arcLength[index+1] - this.arcLength[index])
   var ti = 1.0 - t
   var x = [0,0,0]
   for(var i=0; i<3; ++i) {
     x[i] = ti * a[i] + t * b[i]
   }
-  var dataIndex = (t < 0.5) ? index : (index+1)
+  var dataIndex = Math.min((t < 0.5) ? index : (index+1), this.points.length-1)
   return new PickResult(
     tau, 
     x, 
