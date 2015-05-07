@@ -49,7 +49,7 @@ function LinePlot(gl, shader, pickShader, buffer, vao, texture) {
   this.pickShader   = pickShader
   this.buffer       = buffer
   this.vao          = vao
-  this.clipBounds   = [[-Infinity,-Infinity,-Infinity], 
+  this.clipBounds   = [[-Infinity,-Infinity,-Infinity],
                        [ Infinity, Infinity, Infinity]]
   this.points       = []
   this.arcLength    = []
@@ -61,6 +61,7 @@ function LinePlot(gl, shader, pickShader, buffer, vao, texture) {
   this.dashScale    = 1
   this.opacity      = 1
   this.dirty        = true
+  this.pixelRatio   = 1
 }
 
 var proto = LinePlot.prototype
@@ -83,7 +84,6 @@ proto.drawTransparent = proto.draw = function(camera) {
   var gl      = this.gl
   var shader  = this.shader
   var vao     = this.vao
-  gl.lineWidth(this.lineWidth)
   shader.bind()
   shader.uniforms = {
     model:        camera.model      || identity,
@@ -92,24 +92,27 @@ proto.drawTransparent = proto.draw = function(camera) {
     clipBounds:   filterClipBounds(this.clipBounds),
     dashTexture:  this.texture.bind(),
     dashScale:    this.dashScale / this.arcLength[this.arcLength.length-1],
-    opacity:      this.opacity
+    opacity:      this.opacity,
+    screenShape:  [gl.drawingBufferWidth, gl.drawingBufferHeight],
+    pixelRatio:   this.pixelRatio
   }
   vao.bind()
-  vao.draw(gl.LINES, this.vertexCount)
+  vao.draw(gl.TRIANGLE_STRIP, this.vertexCount)
 }
 
 proto.drawPick = function(camera) {
   var gl      = this.gl
   var shader  = this.pickShader
   var vao     = this.vao
-  gl.lineWidth(this.lineWidth)
   shader.bind()
   shader.uniforms = {
     model:      camera.model      || identity,
     view:       camera.view       || identity,
     projection: camera.projection || identity,
     pickId:     this.pickId,
-    clipBounds: filterClipBounds(this.clipBounds)
+    clipBounds: filterClipBounds(this.clipBounds),
+    screenShape:  [gl.drawingBufferWidth, gl.drawingBufferHeight],
+    pixelRatio:   this.pixelRatio
   }
   vao.bind()
   vao.draw(gl.LINES, this.vertexCount)
@@ -118,9 +121,6 @@ proto.drawPick = function(camera) {
 proto.update = function(options) {
   this.dirty = true
 
-  if('lineWidth' in options) {
-    this.lineWidth = options.lineWidth
-  }
   if('dashScale' in options) {
     this.dashScale = options.dashScale
   }
@@ -132,9 +132,11 @@ proto.update = function(options) {
   if(!positions) {
     return
   }
-  
+
   //Default color
   var colors = options.color || options.colors || [0,0,0,1]
+
+  var lineWidth = options.lineWidth || 1
 
   //Recalculate buffer data
   var buffer          = []
@@ -152,7 +154,7 @@ fill_loop:
 
     arcLengthArray.push(arcLength)
     pointArray.push(a.slice())
-    
+
     for(var j=0; j<3; ++j) {
       if(isNaN(a[j]) || isNaN(b[j]) ||
         !isFinite(a[j]) || !isFinite(b[j])) {
@@ -176,12 +178,24 @@ fill_loop:
       bcolor = [bcolor[0], bcolor[1], bcolor[2], 1]
     }
 
+    var w0, w1
+    if(Array.isArray(lineWidth)) {
+      w0 = lineWidth[i-1]
+      w1 = lineWidht[i]
+    } else {
+      w0 = w1 = lineWidth
+    }
+
     var t0 = arcLength
     arcLength += distance(a, b)
-    buffer.push(a[0], a[1], a[2], t0,        acolor[0], acolor[1], acolor[2], acolor[3],
-                b[0], b[1], b[2], arcLength, bcolor[0], bcolor[1], bcolor[2], bcolor[3])
 
-    vertexCount += 2
+    buffer.push(
+      a[0], a[1], a[2], b[0], b[1], b[2], t0, w0, acolor[0], acolor[1], acolor[2], acolor[3],
+      a[0], a[1], a[2], b[0], b[1], b[2], t0,-w0, acolor[0], acolor[1], acolor[2], acolor[3],
+      b[0], b[1], b[2], a[0], a[1], a[2], arcLength,-w0, bcolor[0], bcolor[1], bcolor[2], bcolor[3],
+      b[0], b[1], b[2], a[0], a[1], a[2], arcLength, w0, bcolor[0], bcolor[1], bcolor[2], bcolor[3])
+
+    vertexCount += 4
   }
   this.buffer.update(buffer)
 
@@ -245,7 +259,7 @@ proto.pick = function(selection) {
   }
   if(index === this.arcLength.length-1) {
     return new PickResult(
-      this.arcLength[this.arcLength.length-1], 
+      this.arcLength[this.arcLength.length-1],
       this.points[this.points.length-1].slice(),
       index)
   }
@@ -259,8 +273,8 @@ proto.pick = function(selection) {
   }
   var dataIndex = Math.min((t < 0.5) ? index : (index+1), this.points.length-1)
   return new PickResult(
-    tau, 
-    x, 
+    tau,
+    x,
     dataIndex,
     this.points[dataIndex])
 }
@@ -269,14 +283,18 @@ function createLinePlot(options) {
   var gl = options.gl || (options.scene && options.scene.gl)
 
   var shader = createShader(gl)
-  shader.attributes.position.location   = 0
-  shader.attributes.arcLength.location  = 1
-  shader.attributes.color.location      = 2
+  shader.attributes.position.location     = 0
+  shader.attributes.nextPosition.location = 1
+  shader.attributes.arcLength.location    = 2
+  shader.attributes.lineWidth.location    = 3
+  shader.attributes.color.location        = 4
 
   var pickShader = createPickShader(gl)
-  pickShader.attributes.position.location   = 0
-  pickShader.attributes.arcLength.location  = 1
-  pickShader.attributes.color.location      = 2
+  pickShader.attributes.position.location     = 0
+  pickShader.attributes.nextPosition.location = 1
+  pickShader.attributes.arcLength.location    = 2
+  pickShader.attributes.lineWidth.location    = 3
+  pickShader.attributes.color.location        = 4
 
   var buffer = createBuffer(gl)
   var vao = createVAO(gl, [
@@ -284,19 +302,31 @@ function createLinePlot(options) {
         'buffer': buffer,
         'size': 3,
         'offset': 0,
-        'stride': 32
+        'stride': 48
       },
-      { 
+      {
+        'buffer': buffer,
+        'size': 3,
+        'offset': 12,
+        'stride': 48
+      },
+      {
         'buffer': buffer,
         'size': 1,
-        'offset': 12,
-        'stride': 32
+        'offset': 24,
+        'stride': 48
+      },
+      {
+        'buffer': buffer,
+        'size': 1,
+        'offset': 28,
+        'stride': 48
       },
       {
         'buffer': buffer,
         'size': 4,
-        'offset': 16,
-        'stride': 32
+        'offset': 32,
+        'stride': 48
       }
     ])
 
