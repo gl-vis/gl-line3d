@@ -115,7 +115,7 @@ proto.drawPick = function(camera) {
     pixelRatio:   this.pixelRatio
   }
   vao.bind()
-  vao.draw(gl.LINES, this.vertexCount)
+  vao.draw(gl.TRIANGLE_STRIP, this.vertexCount)
 }
 
 proto.update = function(options) {

@@ -12,18 +12,13 @@ varying vec4 fragColor;
 varying vec3 worldPosition;
 varying float pixelArcLength;
 
-vec3 project(vec3 p) {
-  vec4 clip = projection * view * model * vec4(p, 1.0);
-  return clip.xyz / clip.w;
-}
-
 void main() {
-  vec3 p0 = project(position);
-  vec3 p1 = project(nextPosition);
-  vec2 tangent = normalize(screenShape * (p1.xy - p0.xy));
+  vec4 projected = projection * view * model * vec4(position, 1.0);
+  vec4 tangentClip = projection * view * model * vec4(nextPosition - position, 0.0);
+  vec2 tangent = normalize(screenShape * tangentClip.xy);
   vec2 offset = 0.5 * pixelRatio * lineWidth * vec2(tangent.y, -tangent.x) / screenShape;
 
-  gl_Position = vec4(p0.xy + offset, p0.z, 1.0);
+  gl_Position = vec4(projected.xy + projected.w * offset, projected.zw);
 
   worldPosition = position;
   pixelArcLength = arcLength;
