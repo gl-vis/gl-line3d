@@ -26,7 +26,7 @@ for(var i=0; i<100; ++i) {
 
 //Create the line plot
 var lines = createLines({
-  gl:       scene.gl
+  gl:       scene.gl,
   position: polyline,
   color:    [1,0,0]
 })
