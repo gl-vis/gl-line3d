@@ -124,6 +124,8 @@ proto.update = function (options) {
 
   this.dirty = true
 
+  var connectGaps = !!options.connectGaps
+
   if ('dashScale' in options) {
     this.dashScale = options.dashScale
   }
@@ -150,6 +152,7 @@ proto.update = function (options) {
   var bounds = [
     [ Infinity, Infinity, Infinity ],
     [ -Infinity, -Infinity, -Infinity ]]
+  var hadGap = false
 
   fill_loop:
   for (i = 1; i < positions.length; ++i) {
@@ -162,6 +165,15 @@ proto.update = function (options) {
     for (j = 0; j < 3; ++j) {
       if (isNaN(a[j]) || isNaN(b[j]) ||
         !isFinite(a[j]) || !isFinite(b[j])) {
+
+        if (!connectGaps && buffer.length > 0) {
+          for (var k = 0; k < 24; ++k) {
+            buffer.push(buffer[buffer.length - 12])
+          }
+          vertexCount += 2
+          hadGap = true
+        }
+
         continue fill_loop
       }
       bounds[0][j] = Math.min(bounds[0][j], a[j], b[j])
@@ -191,6 +203,15 @@ proto.update = function (options) {
 
     var t0 = arcLength
     arcLength += distance(a, b)
+
+    if (hadGap) {
+      for (j = 0; j < 2; ++j) {
+        buffer.push(
+          a[0], a[1], a[2], b[0], b[1], b[2], t0, w0, acolor[0], acolor[1], acolor[2], acolor[3])
+      }
+      vertexCount += 2
+      hadGap = false
+    }
 
     buffer.push(
       a[0], a[1], a[2], b[0], b[1], b[2], t0, w0, acolor[0], acolor[1], acolor[2], acolor[3],
