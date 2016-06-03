@@ -34,7 +34,8 @@ shell.on("gl-init", function() {
       ])
   }
 
-  lines = createLines(gl, {
+  lines = createLines({
+    gl: gl,
     position: polyline,
     color: [1,0,0],
     dashes: [0.5,0.5],
