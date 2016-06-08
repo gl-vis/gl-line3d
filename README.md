@@ -67,5 +67,18 @@ Updates the plot.  `options` has the same properties as in the constructor
 #### `lines.lineWidth`
 The width of the lines
 
+# Included example in the `example` directory
+
+To run it, follow these steps:
+
+```
+git clone https://github.com/gl-vis/gl-line3d.git
+cd gl-line3d
+mkdir dist
+browserify lines.js -o dist/bundle.js
+browserify example/simple.js -o dist/simple_example_bundle.js
+```
+then open `simple.html` in the `example` directory.
+
 # Credits
 (c) 2014 Mikola Lysenko. MIT License

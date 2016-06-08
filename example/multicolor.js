@@ -25,6 +25,7 @@ shell.on("gl-init", function() {
 
   //Create the line plot
   var polyline = []
+  var segmentColor = []
   for(var i=0; i<100; ++i) {
     var theta = (i / 100.0) * Math.PI
     polyline.push([
@@ -32,13 +33,16 @@ shell.on("gl-init", function() {
         Math.sin(3*theta),
         (i/50) - 1.0
       ])
+    segmentColor.push([Math.random(), Math.random(), Math.random()])
   }
 
-  lines = createLines(gl, {
+  lines = createLines({
+    gl: gl,
     position: polyline,
-    color: [1,0,0],
+    color: segmentColor,
+    lineWidth: 8,
     dashes: [0.5,0.5],
-    dashScale: 100
+    dashScale: 10
   })
 
   //Create axes object
