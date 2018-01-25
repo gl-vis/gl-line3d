@@ -99,6 +99,7 @@ proto.drawTransparent = proto.draw = function (camera) {
   }
   vao.bind()
   vao.draw(gl.TRIANGLE_STRIP, this.vertexCount)
+  vao.unbind()
 }
 
 proto.drawPick = function (camera) {
@@ -117,6 +118,7 @@ proto.drawPick = function (camera) {
   }
   vao.bind()
   vao.draw(gl.TRIANGLE_STRIP, this.vertexCount)
+  vao.unbind()
 }
 
 proto.update = function (options) {
