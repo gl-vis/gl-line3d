@@ -16,9 +16,9 @@ bool outOfRange(float a, float b, float p) {
 }
 
 void main() {
-  if (outOfRange(clipBounds[0].x, clipBounds[1].x, worldPosition.x)) discard;
-  if (outOfRange(clipBounds[0].y, clipBounds[1].y, worldPosition.y)) discard;
-  if (outOfRange(clipBounds[0].z, clipBounds[1].z, worldPosition.z)) discard;
+  if ((outOfRange(clipBounds[0].x, clipBounds[1].x, worldPosition.x)) ||
+      (outOfRange(clipBounds[0].y, clipBounds[1].y, worldPosition.y)) ||
+      (outOfRange(clipBounds[0].z, clipBounds[1].z, worldPosition.z))) discard;
 
   gl_FragColor = vec4(pickId/255.0, packFloat(pixelArcLength).xyz);
 }

@@ -16,9 +16,9 @@ bool outOfRange(float a, float b, float p) {
 }
 
 void main() {
-  if (outOfRange(clipBounds[0].x, clipBounds[1].x, worldPosition.x)) discard;
-  if (outOfRange(clipBounds[0].y, clipBounds[1].y, worldPosition.y)) discard;
-  if (outOfRange(clipBounds[0].z, clipBounds[1].z, worldPosition.z)) discard;
+  if ((outOfRange(clipBounds[0].x, clipBounds[1].x, worldPosition.x)) ||
+      (outOfRange(clipBounds[0].y, clipBounds[1].y, worldPosition.y)) ||
+      (outOfRange(clipBounds[0].z, clipBounds[1].z, worldPosition.z))) discard;
 
   float dashWeight = texture2D(dashTexture, vec2(dashScale * pixelArcLength, 0)).r;
   if(dashWeight < 0.5) {
