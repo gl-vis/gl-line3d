@@ -1,5 +1,7 @@
 precision mediump float;
 
+#pragma glslify: outOfRange = require(glsl-out-of-range)
+
 uniform vec3      clipBounds[2];
 uniform sampler2D dashTexture;
 uniform float     dashScale;
@@ -10,9 +12,8 @@ varying float   pixelArcLength;
 varying vec4    fragColor;
 
 void main() {
-  if(any(lessThan(worldPosition, clipBounds[0])) || any(greaterThan(worldPosition, clipBounds[1]))) {
-    discard;
-  }
+  if (outOfRange(clipBounds[0], clipBounds[1], worldPosition)) discard;
+
   float dashWeight = texture2D(dashTexture, vec2(dashScale * pixelArcLength, 0)).r;
   if(dashWeight < 0.5) {
     discard;
