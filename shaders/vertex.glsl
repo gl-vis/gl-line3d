@@ -14,7 +14,7 @@ varying float pixelArcLength;
 
 vec3 project(vec3 p) {
   vec4 pp = projection * view * model * vec4(p, 1.0);
-  return pp.xyz / max(pp.w, 0.0001);
+  return pp.xyz / pp.w;
 }
 
 void main() {
