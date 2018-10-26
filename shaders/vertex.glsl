@@ -12,18 +12,20 @@ varying vec4 fragColor;
 varying vec3 worldPosition;
 varying float pixelArcLength;
 
-vec3 project(vec3 p) {
-  vec4 pp = projection * view * model * vec4(p, 1.0);
-  return pp.xyz / pp.w;
+vec4 project(vec3 p) {
+  return projection * view * model * vec4(p, 1.0);
 }
 
 void main() {
-  vec3 startPoint = project(position);
-  vec3 endPoint   = project(nextPosition);
+  vec4 startPoint = project(position);
+  vec4 endPoint   = project(nextPosition);
+
+  vec2 A = startPoint.xy / startPoint.w;
+  vec2 B =   endPoint.xy /   endPoint.w;
 
   float clipAngle = atan(
-    (endPoint.y - startPoint.y) * screenShape.y,
-    (endPoint.x - startPoint.x) * screenShape.x
+    (B.y - A.y) * screenShape.y,
+    (B.x - A.x) * screenShape.x
   );
 
   vec2 offset = 0.5 * pixelRatio * lineWidth * vec2(
@@ -31,7 +33,7 @@ void main() {
     -cos(clipAngle)
   ) / screenShape;
 
-  gl_Position = vec4(startPoint.xy + offset, startPoint.z, 1.0);
+  gl_Position = vec4(startPoint.xy + startPoint.w * offset, startPoint.zw);
 
   worldPosition = position;
   pixelArcLength = arcLength;
