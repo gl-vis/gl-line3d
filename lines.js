@@ -185,19 +185,17 @@ proto.update = function (options) {
 
       var acolor, bcolor
       if (Array.isArray(colors[0])) {
-        if (i - 1 < colors.length) {
-          acolor = colors[i - 1]
-        } else {
-          acolor = [0, 0, 0, 0]
-        }
-        if (i < colors.length) {
-          bcolor = colors[i]
-        } else {
-          bcolor = [0, 0, 0, 0]
-        }
+        acolor = (colors.length > i - 1) ? colors[i - 1] :             // using index value
+                 (colors.length > 0)     ? colors[colors.length - 1] : // using last item
+                                           [0, 0, 0, 1];               // using black
+
+        bcolor = (colors.length > i) ? colors[i] :                 // using index value
+                 (colors.length > 0) ? colors[colors.length - 1] : // using last item
+                                       [0, 0, 0, 1];               // using black
       } else {
         acolor = bcolor = colors
       }
+
       if (acolor.length === 3) {
         acolor = [acolor[0], acolor[1], acolor[2], 1]
       }
@@ -207,11 +205,9 @@ proto.update = function (options) {
 
       var w0
       if (Array.isArray(lineWidth)) {
-        if (i - 1 < lineWidth.length) {
-          w0 = lineWidth[i - 1]
-        } else {
-          w0 = 1
-        }
+        w0 = (lineWidth.length > i - 1) ? lineWidth[i - 1] :                // using index value
+             (lineWidth.length > 0)     ? lineWidth[lineWidth.length - 1] : // using last item
+                                          [0, 0, 0, 1];                     // using black
       } else {
         w0 = lineWidth
       }
@@ -243,6 +239,7 @@ proto.update = function (options) {
   pointArray.push(positions[positions.length - 1].slice())
 
   this.bounds = bounds
+
   this.vertexCount = vertexCount
 
   this.points = pointArray
