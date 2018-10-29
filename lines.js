@@ -82,6 +82,7 @@ proto.setPickBase = function (id) {
 }
 
 proto.drawTransparent = proto.draw = function (camera) {
+  if (!this.vertexCount) return
   var gl = this.gl
   var shader = this.shader
   var vao = this.vao
@@ -103,6 +104,7 @@ proto.drawTransparent = proto.draw = function (camera) {
 }
 
 proto.drawPick = function (camera) {
+  if (!this.vertexCount) return
   var gl = this.gl
   var shader = this.pickShader
   var vao = this.vao
@@ -135,16 +137,6 @@ proto.update = function (options) {
     this.opacity = +options.opacity
   }
 
-  var positions = options.position || options.positions
-  if (!positions) {
-    return
-  }
-
-  // Default color
-  var colors = options.color || options.colors || [0, 0, 0, 1]
-
-  var lineWidth = options.lineWidth || 1
-
   // Recalculate buffer data
   var buffer = []
   var arcLengthArray = []
@@ -154,74 +146,92 @@ proto.update = function (options) {
   var bounds = [
     [ Infinity, Infinity, Infinity ],
     [ -Infinity, -Infinity, -Infinity ]]
-  var hadGap = false
 
-  fill_loop:
-  for (i = 1; i < positions.length; ++i) {
-    var a = positions[i - 1]
-    var b = positions[i]
+  var positions = options.position || options.positions
+  if (positions) {
 
-    arcLengthArray.push(arcLength)
-    pointArray.push(a.slice())
+    // Default color
+    var colors = options.color || options.colors || [0, 0, 0, 1]
 
-    for (j = 0; j < 3; ++j) {
-      if (isNaN(a[j]) || isNaN(b[j]) ||
-        !isFinite(a[j]) || !isFinite(b[j])) {
+    var lineWidth = options.lineWidth || 1
 
-        if (!connectGaps && buffer.length > 0) {
-          for (var k = 0; k < 24; ++k) {
-            buffer.push(buffer[buffer.length - 12])
+    var hadGap = false
+
+    fill_loop:
+    for (i = 1; i < positions.length; ++i) {
+      var a = positions[i - 1]
+      var b = positions[i]
+
+      arcLengthArray.push(arcLength)
+      pointArray.push(a.slice())
+
+      for (j = 0; j < 3; ++j) {
+        if (isNaN(a[j]) || isNaN(b[j]) ||
+          !isFinite(a[j]) || !isFinite(b[j])) {
+
+          if (!connectGaps && buffer.length > 0) {
+            for (var k = 0; k < 24; ++k) {
+              buffer.push(buffer[buffer.length - 12])
+            }
+            vertexCount += 2
+            hadGap = true
           }
-          vertexCount += 2
-          hadGap = true
+
+          continue fill_loop
         }
-
-        continue fill_loop
+        bounds[0][j] = Math.min(bounds[0][j], a[j], b[j])
+        bounds[1][j] = Math.max(bounds[1][j], a[j], b[j])
       }
-      bounds[0][j] = Math.min(bounds[0][j], a[j], b[j])
-      bounds[1][j] = Math.max(bounds[1][j], a[j], b[j])
-    }
 
-    var acolor, bcolor
-    if (Array.isArray(colors[0])) {
-      acolor = colors[i - 1]
-      bcolor = colors[i]
-    } else {
-      acolor = bcolor = colors
-    }
-    if (acolor.length === 3) {
-      acolor = [acolor[0], acolor[1], acolor[2], 1]
-    }
-    if (bcolor.length === 3) {
-      bcolor = [bcolor[0], bcolor[1], bcolor[2], 1]
-    }
+      var acolor, bcolor
+      if (Array.isArray(colors[0])) {
+        acolor = (colors.length > i - 1) ? colors[i - 1] :             // using index value
+                 (colors.length > 0)     ? colors[colors.length - 1] : // using last item
+                                           [0, 0, 0, 1];               // using black
 
-    var w0
-    if (Array.isArray(lineWidth)) {
-      w0 = lineWidth[i - 1]
-    } else {
-      w0 = lineWidth
-    }
-
-    var t0 = arcLength
-    arcLength += distance(a, b)
-
-    if (hadGap) {
-      for (j = 0; j < 2; ++j) {
-        buffer.push(
-          a[0], a[1], a[2], b[0], b[1], b[2], t0, w0, acolor[0], acolor[1], acolor[2], acolor[3])
+        bcolor = (colors.length > i) ? colors[i] :                 // using index value
+                 (colors.length > 0) ? colors[colors.length - 1] : // using last item
+                                       [0, 0, 0, 1];               // using black
+      } else {
+        acolor = bcolor = colors
       }
-      vertexCount += 2
-      hadGap = false
+
+      if (acolor.length === 3) {
+        acolor = [acolor[0], acolor[1], acolor[2], 1]
+      }
+      if (bcolor.length === 3) {
+        bcolor = [bcolor[0], bcolor[1], bcolor[2], 1]
+      }
+
+      var w0
+      if (Array.isArray(lineWidth)) {
+        w0 = (lineWidth.length > i - 1) ? lineWidth[i - 1] :                // using index value
+             (lineWidth.length > 0)     ? lineWidth[lineWidth.length - 1] : // using last item
+                                          [0, 0, 0, 1];                     // using black
+      } else {
+        w0 = lineWidth
+      }
+
+      var t0 = arcLength
+      arcLength += distance(a, b)
+
+      if (hadGap) {
+        for (j = 0; j < 2; ++j) {
+          buffer.push(
+            a[0], a[1], a[2], b[0], b[1], b[2], t0, w0, acolor[0], acolor[1], acolor[2], acolor[3])
+        }
+        vertexCount += 2
+        hadGap = false
+      }
+
+      buffer.push(
+        a[0], a[1], a[2], b[0], b[1], b[2], t0, w0, acolor[0], acolor[1], acolor[2], acolor[3],
+        a[0], a[1], a[2], b[0], b[1], b[2], t0, -w0, acolor[0], acolor[1], acolor[2], acolor[3],
+        b[0], b[1], b[2], a[0], a[1], a[2], arcLength, -w0, bcolor[0], bcolor[1], bcolor[2], bcolor[3],
+        b[0], b[1], b[2], a[0], a[1], a[2], arcLength, w0, bcolor[0], bcolor[1], bcolor[2], bcolor[3])
+
+      vertexCount += 4
     }
-
-    buffer.push(
-      a[0], a[1], a[2], b[0], b[1], b[2], t0, w0, acolor[0], acolor[1], acolor[2], acolor[3],
-      a[0], a[1], a[2], b[0], b[1], b[2], t0, -w0, acolor[0], acolor[1], acolor[2], acolor[3],
-      b[0], b[1], b[2], a[0], a[1], a[2], arcLength, -w0, bcolor[0], bcolor[1], bcolor[2], bcolor[3],
-      b[0], b[1], b[2], a[0], a[1], a[2], arcLength, w0, bcolor[0], bcolor[1], bcolor[2], bcolor[3])
-
-    vertexCount += 4
   }
   this.buffer.update(buffer)
 
