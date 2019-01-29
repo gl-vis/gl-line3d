@@ -12,7 +12,10 @@ varying float   pixelArcLength;
 varying vec4    fragColor;
 
 void main() {
-  if (outOfRange(clipBounds[0], clipBounds[1], worldPosition)) discard;
+  if (
+    outOfRange(clipBounds[0], clipBounds[1], worldPosition) ||
+    fragColor.a * opacity == 0.
+  ) discard;
 
   float dashWeight = texture2D(dashTexture, vec2(dashScale * pixelArcLength, 0)).r;
   if(dashWeight < 0.5) {
