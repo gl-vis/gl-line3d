@@ -203,6 +203,8 @@ proto.update = function (options) {
         bcolor = [bcolor[0], bcolor[1], bcolor[2], 1]
       }
 
+      if(this.opacity === 1 && acolor[3] < 1) this.opacity = 0.999
+
       var w0
       if (Array.isArray(lineWidth)) {
         w0 = (lineWidth.length > i - 1) ? lineWidth[i - 1] :                // using index value
