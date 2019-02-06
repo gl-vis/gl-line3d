@@ -61,6 +61,7 @@ function LinePlot (gl, shader, pickShader, buffer, vao, texture) {
   this.texture = texture
   this.dashScale = 1
   this.opacity = 1
+  this.hasAlpha = false
   this.dirty = true
   this.pixelRatio = 1
 }
@@ -68,11 +69,11 @@ function LinePlot (gl, shader, pickShader, buffer, vao, texture) {
 var proto = LinePlot.prototype
 
 proto.isTransparent = function () {
-  return this.opacity < 1
+  return this.hasAlpha
 }
 
 proto.isOpaque = function () {
-  return this.opacity >= 1
+  return !this.hasAlpha
 }
 
 proto.pickSlots = 1
@@ -133,8 +134,13 @@ proto.update = function (options) {
   if ('dashScale' in options) {
     this.dashScale = options.dashScale
   }
+
+  this.hasAlpha = false // default to no transparent draw
   if ('opacity' in options) {
     this.opacity = +options.opacity
+    if(this.opacity < 1) {
+      this.hasAlpha = true;
+    }
   }
 
   // Recalculate buffer data
@@ -202,6 +208,8 @@ proto.update = function (options) {
       if (bcolor.length === 3) {
         bcolor = [bcolor[0], bcolor[1], bcolor[2], 1]
       }
+
+      if(!this.hasAlpha && acolor[3] < 1) this.hasAlpha = true
 
       var w0
       if (Array.isArray(lineWidth)) {
