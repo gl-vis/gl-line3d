@@ -134,8 +134,15 @@ proto.update = function (options) {
   if ('dashScale' in options) {
     this.dashScale = options.dashScale
   }
+
+  this.hasAlpha = false // default to no transparent draw
   if ('opacity' in options) {
     this.opacity = +options.opacity
+    if(this.opacity < 1) {
+      this.hasAlpha = true;
+    } else {
+      this.hasAlpha = false;
+    }
   }
 
   // Recalculate buffer data
