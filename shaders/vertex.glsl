@@ -1,4 +1,4 @@
-precision mediump float;
+precision highp float;
 
 attribute vec3 position, nextPosition;
 attribute float arcLength, lineWidth;

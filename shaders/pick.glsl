@@ -1,4 +1,4 @@
-precision mediump float;
+precision highp float;
 
 #pragma glslify: packFloat = require(glsl-read-float)
 #pragma glslify: outOfRange = require(glsl-out-of-range)
