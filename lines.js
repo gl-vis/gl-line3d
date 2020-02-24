@@ -5,7 +5,18 @@ module.exports = createLinePlot
 var createBuffer = require('gl-buffer')
 var createVAO = require('gl-vao')
 var createTexture = require('gl-texture2d')
-var unpackFloat = require('glsl-read-float')
+
+var UINT8_VIEW = new Uint8Array(4)
+var FLOAT_VIEW = new Float32Array(UINT8_VIEW.buffer)
+// https://github.com/mikolalysenko/glsl-read-float/blob/master/index.js
+function unpackFloat(x, y, z, w) {
+  UINT8_VIEW[0] = w
+  UINT8_VIEW[1] = z
+  UINT8_VIEW[2] = y
+  UINT8_VIEW[3] = x
+  return FLOAT_VIEW[0]
+}
+
 var bsearch = require('binary-search-bounds')
 var ndarray = require('ndarray')
 var shaders = require('./lib/shaders')
