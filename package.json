@@ -18,10 +18,11 @@
     "ndarray": "^1.0.16"
   },
   "devDependencies": {
+    "chttps": "^1.0.6",
     "game-shell-orbit-camera": "^1.0.0",
-    "gl-now": "^1.3.1",
-    "gl-matrix": "^3.0.0",
     "gl-axes": "^6.0.2",
+    "gl-matrix": "^3.0.0",
+    "gl-now": "^1.3.1",
     "gl-select": "^3.0.0",
     "gl-spikes": "^2.0.1"
   },
