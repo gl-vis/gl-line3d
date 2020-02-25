@@ -8,20 +8,20 @@
   },
   "dependencies": {
     "binary-search-bounds": "^2.0.4",
-    "gl-buffer": "^2.0.8",
+    "gl-buffer": "^2.1.2",
     "gl-shader": "^4.2.1",
-    "gl-texture2d": "^2.0.2",
-    "gl-vao": "^1.1.3",
+    "gl-texture2d": "^2.1.0",
+    "gl-vao": "^1.3.0",
     "glsl-out-of-range": "^1.0.4",
     "glslify": "^7.0.0",
-    "ndarray": "^1.0.16"
+    "ndarray": "^1.0.18"
   },
   "devDependencies": {
     "chttps": "^1.0.6",
     "game-shell-orbit-camera": "^1.0.0",
     "gl-axes": "^6.0.2",
-    "gl-matrix": "^3.0.0",
-    "gl-now": "^1.3.1",
+    "gl-matrix": "^3.2.1",
+    "gl-now": "^1.4.0",
     "gl-select": "^3.0.0",
     "gl-spikes": "^2.0.1"
   },
