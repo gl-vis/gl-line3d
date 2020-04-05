@@ -20,7 +20,7 @@
     "chttps": "^1.0.6",
     "game-shell-orbit-camera": "^1.0.0",
     "gl-axes": "^6.0.2",
-    "gl-matrix": "^3.2.1",
+    "gl-matrix": "^3.3.0",
     "gl-now": "^1.4.0",
     "gl-select": "^3.0.0",
     "gl-spikes": "^2.0.1"
