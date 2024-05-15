@@ -13,7 +13,7 @@ varying vec3 worldPosition;
 varying float pixelArcLength;
 
 vec4 project(vec3 p) {
-  return projection * view * model * vec4(p, 1.0);
+  return projection * (view * (model * vec4(p, 1.0)));
 }
 
 void main() {
